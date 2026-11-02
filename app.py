@@ -13,8 +13,7 @@ def load_data():
         st.error(f"No se encontró el archivo: {excel_path.name}")
         return pd.DataFrame()
 
-    df = pd.read_excel(excel_path)
-    return df
+    return pd.read_excel(excel_path)
 
 
 df = load_data()
@@ -30,16 +29,27 @@ if missing_columns:
     st.stop()
 
 # --- PANEL DE CONTROL Y FILTROS ---
-st.sidebar.title("📌 Panel de Control y Filtros")
-region_sel = st.sidebar.multiselect("Región:", options=df["Region"].dropna().unique(), default=df["Region"].dropna().unique())
-state_sel = st.sidebar.multiselect("Estado:", options=df["State"].dropna().unique(), default=df["State"].dropna().unique())
-categoria_sel = st.sidebar.multiselect("Categoría de Producto:", options=df["Category"].dropna().unique(), default=df["Category"].dropna().unique())
+st.sidebar.title("📌 Panel de Control")
 
-df_filt = df[
-    (df["Region"].isin(region_sel)) &
-    (df["State"].isin(state_sel)) &
-    (df["Category"].isin(categoria_sel))
-].copy()
+region_options = ["Todos"] + sorted(df["Region"].dropna().unique().tolist())
+state_options = ["Todos"] + sorted(df["State"].dropna().unique().tolist())
+categoria_options = ["Todos"] + sorted(df["Category"].dropna().unique().tolist())
+
+region_sel = st.sidebar.selectbox("Región:", options=region_options)
+state_sel = st.sidebar.selectbox("Estado:", options=state_options)
+categoria_sel = st.sidebar.selectbox("Categoría de Producto:", options=categoria_options)
+
+# Filtrado según selección
+if region_sel != "Todos":
+    df_filt = df[df["Region"] == region_sel].copy()
+else:
+    df_filt = df.copy()
+
+if state_sel != "Todos":
+    df_filt = df_filt[df_filt["State"] == state_sel]
+
+if categoria_sel != "Todos":
+    df_filt = df_filt[df_filt["Category"] == categoria_sel]
 
 # --- TÍTULO Y MÉTRICAS ---
 st.title("📊 Dashboard Interactivo de Ventas y Rentabilidad")
